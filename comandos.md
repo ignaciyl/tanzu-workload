@@ -27,7 +27,7 @@ test-tanzu   web    test-tanzu   SupplyChainNotFound   24m
 
 Detalle de un workload
 ``` 
-nacho@tanzu-virtual-machine:~/tap$ tanzu apps workloads get test-tanzu
+tanzu -n development apps workloads get test-tanzu
 📡 Overview
    name:   test-tanzu
    type:   web
