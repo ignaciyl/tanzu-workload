@@ -1,3 +1,5 @@
+REGISTRY = os.getenv("REGISTRY", default='harbor.lab.ejie.local')
+REGISTRY-REPOSITORY = os.getenv("REGISTRY-REPOSITORY", default='test')
 SOURCE_IMAGE = os.getenv("SOURCE_IMAGE", default='source-image-location')
 LOCAL_PATH = os.getenv("LOCAL_PATH", default='local-path')
 NAMESPACE = os.getenv("NAMESPACE", default='default')
@@ -6,8 +8,8 @@ OUTPUT_TO_NULL_COMMAND = os.getenv("OUTPUT_TO_NULL_COMMAND", default=' > /dev/nu
 k8s_custom_deploy(
     'workload-name',
     apply_cmd="tanzu apps workload apply -f path-to-workload-yaml --debug --live-update" +
+        " --source-image " + REGISTRY/REGISTRY-REPOSITORY +
         " --local-path " + LOCAL_PATH +
-        " --source-image " + SOURCE_IMAGE +
         " --namespace " + NAMESPACE +
         " --yes " +
         OUTPUT_TO_NULL_COMMAND + 
