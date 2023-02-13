@@ -1,0 +1,13 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: app-test
+  description: app-description
+  tags:
+    - tanzu
+  annotations:
+    'backstage.io/kubernetes-label-selector': 'app.kubernetes.io/part-of=app-test'
+spec:
+  type: service
+  lifecycle: experimental
+  owner: default-team
