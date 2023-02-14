@@ -64,3 +64,82 @@ https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/1.3/tap/GUID-cli-pl
 ``` 
 Workload ?[2m[TemplateRejectedByAPIServer]?[0m:   unable to apply object [development/test-tanzu] for resource [source-provider] in supply chain [source-test-scan-to-url]: failed to get unstructured [development/test-tanzu] from api server: imagerepositories.source.apps.tanzu.vmware.com "test-tanzu" is forbidden: User "system:serviceaccount:development:default" cannot get resource "imagerepositories" in API group "source.apps.tanzu.vmware.com" in the namespace "development"
 ``` 
+
+Asignar el rol(funcionó en Linux) y lanzar el comando de nuevo 
+``` 
+$ tanzu rbac binding add --user administrator@baterav2.infra --role app-editor --namespace development
+Created RoleBinding 'app-editor' in namespace 'development'
+Added User 'administrator@baterav2.infra' to RoleBinding 'app-editor' in namespace 'development'
+Created ClusterRoleBinding 'app-editor-cluster-access'
+Added User 'administrator@baterav2.infra' to ClusterRoleBinding 'app-editor-cluster-access'
+
+$ tanzu rbac binding add --user system:serviceaccount --role app-editor --namespace development
+Added User 'system:serviceaccount' to RoleBinding 'app-editor' in namespace 'development'
+Added User 'system:serviceaccount' to ClusterRoleBinding 'app-editor-cluster-access'
+
+$ tanzu rbac binding add --user system:serviceaccount:development:default --role app-editor --namespace development
+Added User 'system:serviceaccount:development:default' to RoleBinding 'app-editor' in namespace 'development'
+Added User 'system:serviceaccount:development:default' to ClusterRoleBinding 'app-editor-cluster-access'
+
+$tanzu rbac binding add --user wcp:10.230.24.18:administrator@baterav2.infra --role app-editor --namespace development
+Added User 'wcp:10.230.24.18:administrator@baterav2.infra' to RoleBinding 'app-editor' in namespace 'development'
+Added User 'wcp:10.230.24.18:administrator@baterav2.infra' to ClusterRoleBinding 'app-editor-cluster-access'
+
+tanzu apps workload create test-tanzu --app test-tanzu --type web --local-path . --source-image harbor.lab.ejie.local/test/test --registry-ca-cert ./ca.pem --registry-username admin --registry-password xxxxxxxxx   --label apps.tanzu.vmware.com/has-tests=true --namespace development
+``` 
+
+Añadir la credencial para subir el objeto al registro
+``` 
+tanzu secret registry add registry-credentials --server harbor.lab.ejie.local/test/test --username admin --password Harbor12345 --namespace development
+``` 
+
+
+Añadir reglas de RBAC para autorizar al service account en namespace de developer
+``` 
+cat <<EOF | kubectl -n development apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tap-registry
+  annotations:
+    secretgen.carvel.dev/image-pull-secret: ""
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: e30K
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+secrets:
+  - name: registry-credentials
+imagePullSecrets:
+  - name: registry-credentials
+  - name: tap-registry
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: default-permit-deliverable
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: deliverable
+subjects:
+  - kind: ServiceAccount
+    name: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: default-permit-workload
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: workload
+subjects:
+  - kind: ServiceAccount
+    name: default
+EOF
+
+``` 
