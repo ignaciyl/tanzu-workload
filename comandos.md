@@ -143,3 +143,30 @@ subjects:
 EOF
 
 ``` 
+
+Borrar un workload
+```
+tanzu apps workloads delete test-tanzu -n development
+tanzu apps workload create test-tanzu --app test-tanzu --type web --local-path . --source-image harbor.lab.ejie.local/test/test --registry-ca-cert ./ca.pem --registry-username admin --registry-password Harbor12345   --label apps.tanzu.vmware.com/has-tests=true --namespace development
+
+
+tanzu apps workload create test-tanzu --app test-tanzu --type web --local-path . --git-repo https://github.com/spring-projects/spring-petclinic.git --git-branch main --source-image harbor.lab.ejie.local/test/test --registry-ca-cert ./ca.pem --registry-username admin --registry-password Harbor12345   --label apps.tanzu.vmware.com/has-tests=true --namespace development
+
+https://github.com/spring-projects/spring-petclinic.git
+
+
+  --git-repo https://github.com/vmware-tanzu/application-accelerator-samples \
+  --sub-path tanzu-java-web-app \
+  --git-branch main \
+
+tanzu apps workload create test-tanzu \
+  --app test-tanzu \
+  --git-repo https://github.com/spring-projects/ \
+  --git-branch main \
+  --type web \
+  --label apps.tanzu.vmware.com/has-tests=true \
+  --label app.kubernetes.io/part-of=tanzu-java-web-app \
+  --namespace development \
+  --yes
+
+```
